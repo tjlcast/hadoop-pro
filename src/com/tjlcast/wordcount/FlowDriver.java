@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
 public class FlowDriver {
 
@@ -25,7 +26,12 @@ public class FlowDriver {
 		
 		Job job = Job.getInstance(conf) ;
 		job.setJar("/Users/tangjialiang/Desktop/WordCount.jar"); // remote need
-//		job.setJarByClass(FlowDriver.class); // local need
+//		job.setJarByClass(FlowDriver.class); // local need and at remote operate
+		
+		// set Parition 
+		job.setPartitionerClass(TelephoneParition.class);
+		// the number of reduce tasks is 1
+		job.setNumReduceTasks(2);
 		
 		job.setMapperClass(FlowMapper.class);
 		job.setMapOutputKeyClass(FlowBean.class);
@@ -84,4 +90,17 @@ class FlowReducer extends Reducer<FlowBean, Text, Text, Text> {
 		context.write(new Text(tel), new Text(key.toString()));
 	}
 	
+}
+
+class TelephoneParition extends HashPartitioner<FlowBean, Text> {
+
+	@Override
+	public int getPartition(FlowBean key, Text value, int numReduceTasks) {
+		String telephone = key.getTelephone() ;
+		if (telephone==null ||  telephone.equals("")) {
+			return 0 ;
+		}
+		int flag = Integer.parseInt(telephone.substring(telephone.length()-1, telephone.length())) ;
+		return (flag%2) ;
+	}
 }
