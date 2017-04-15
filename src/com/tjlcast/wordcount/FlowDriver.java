@@ -3,6 +3,7 @@ package com.tjlcast.wordcount;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -15,13 +16,16 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class FlowDriver {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+		
 		Configuration conf = new Configuration() ;
-		conf.set("mapreduce.framework.name", "yarn") ;
-		conf.set("yarn.resourcemanager.hostname", "10.108.217.142");
+		System.setProperty("HADOOP_USER_NAME", "root"); // set jvm user_name
+		conf.set("fs.defaultFS", "hdfs://10.108.217.142:9000"); // remote need
+		conf.set("mapreduce.framework.name", "yarn") ; // remote need
+		conf.set("yarn.resourcemanager.hostname", "10.108.217.142"); // remote need
 		
 		Job job = Job.getInstance(conf) ;
-//		job.setJar("");
-		job.setJarByClass(FlowDriver.class);
+		job.setJar("/Users/tangjialiang/Desktop/WordCount.jar"); // remote need
+//		job.setJarByClass(FlowDriver.class); // local need
 		
 		job.setMapperClass(FlowMapper.class);
 		job.setMapOutputKeyClass(FlowBean.class);
@@ -31,8 +35,19 @@ public class FlowDriver {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(Text.class);
 		
-		FileInputFormat.setInputPaths(job, new Path(""));
-		FileOutputFormat.setOutputPath(job, new Path(""));
+		// remote need
+		FileSystem fs = FileSystem.get(conf);
+		boolean exists = fs.exists(new Path("/tangjialiang/mr/flow/output/day")) ;
+		if(exists) fs.delete(new Path("/tangjialiang/mr/flow/output/day"), true) ;
+		FileInputFormat.setInputPaths(job, new Path("/tangjialiang/mr/flow/input"));
+		FileOutputFormat.setOutputPath(job, new Path("/tangjialiang/mr/flow/output/day"));
+		
+		// local need
+//		FileSystem fs = FileSystem.get(conf);
+//		boolean exists = fs.exists(new Path("/Users/tangjialiang/Desktop/flow/output")) ;
+//		if(exists) fs.delete(new Path("/Users/tangjialiang/Desktop/flow/output"), true) ;
+//		FileInputFormat.setInputPaths(job, new Path("/Users/tangjialiang/Desktop/flow/input"));
+//		FileOutputFormat.setOutputPath(job, new Path("/Users/tangjialiang/Desktop/flow/output")) ;
 		
 		boolean res = job.waitForCompletion(true) ;
 		System.exit(res?0:1);
@@ -50,9 +65,9 @@ class FlowMapper extends Mapper<LongWritable, Text, FlowBean, Text> {
 		String[] words = line.split("\t") ;
 		
 		String telephone = words[1] ;
-		long upFlow = Long.parseLong(words[5]) ;
-		long downFlow = Long.parseLong(words[6]) ;
-		long totalFlow = Long.parseLong(words[7]) ;
+		long upFlow = Long.parseLong(words[6]) ;
+		long downFlow = Long.parseLong(words[7]) ;
+		long totalFlow = Long.parseLong(words[8]) ;
 		fb.setFields(telephone, upFlow, downFlow, totalFlow);
 		
 		context.write(fb, new Text(telephone));
