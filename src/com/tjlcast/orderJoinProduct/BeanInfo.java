@@ -7,6 +7,11 @@ import java.util.Date;
 
 import org.apache.hadoop.io.Writable;
 
+/**
+ * 
+ * @author tangjialiang
+ *
+ */
 public class BeanInfo implements Writable{
 	String id ;
 	int flag ;
