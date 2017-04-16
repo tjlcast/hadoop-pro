@@ -168,6 +168,7 @@ public class BeanInfo implements Writable{
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void readFields(DataInput in) throws IOException {
 		this.id = in.readUTF();

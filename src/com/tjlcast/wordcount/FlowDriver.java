@@ -17,6 +17,7 @@ import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 public class FlowDriver {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+		String home = "/Users/tangjialiang/Desktop/project/bigdata/cloud/mr/flow/" ;
 		
 		Configuration conf = new Configuration() ;
 		System.setProperty("HADOOP_USER_NAME", "root"); // set jvm user_name
@@ -25,7 +26,7 @@ public class FlowDriver {
 		conf.set("yarn.resourcemanager.hostname", "10.108.217.142"); // remote need
 		
 		Job job = Job.getInstance(conf) ;
-		job.setJar("/Users/tangjialiang/Desktop/WordCount.jar"); // remote need
+		job.setJar(home+"flow.jar"); // remote need
 //		job.setJarByClass(FlowDriver.class); // local need and at remote operate
 		
 		// set Parition 
@@ -50,10 +51,10 @@ public class FlowDriver {
 		
 		// local need
 //		FileSystem fs = FileSystem.get(conf);
-//		boolean exists = fs.exists(new Path("/Users/tangjialiang/Desktop/flow/output")) ;
-//		if(exists) fs.delete(new Path("/Users/tangjialiang/Desktop/flow/output"), true) ;
-//		FileInputFormat.setInputPaths(job, new Path("/Users/tangjialiang/Desktop/flow/input"));
-//		FileOutputFormat.setOutputPath(job, new Path("/Users/tangjialiang/Desktop/flow/output")) ;
+//		boolean exists = fs.exists(new Path(home + "output")) ;
+//		if(exists) fs.delete(new Path(home + "output"), true) ;
+//		FileInputFormat.setInputPaths(job, new Path(home + "input"));
+//		FileOutputFormat.setOutputPath(job, new Path(home + "output")) ;
 		
 		boolean res = job.waitForCompletion(true) ;
 		System.exit(res?0:1);
